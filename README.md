@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen" alt="Spring Boot">
-  <img src="https://img.shields.io/badge/Java-17+-blue" alt="Java">
+  <img src="https://img.shields.io/badge/Java-21+-blue" alt="Java">
   <img src="https://img.shields.io/badge/Spring%20AI-Preview-orange" alt="Spring AI">
   <img src="https://img.shields.io/badge/OpenAI-GPT4-ff69b4" alt="OpenAI GPT4">
 </p>
