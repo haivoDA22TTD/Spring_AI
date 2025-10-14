@@ -1,16 +1,22 @@
 package haivo.chatbot.service;
 
+import haivo.chatbot.dto.BillItem;
 import haivo.chatbot.dto.ChatRequest;
+import haivo.chatbot.dto.ExpenseInfo;
+import haivo.chatbot.dto.FilmInfo;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.content.Media;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Service
 public class ChatService {
@@ -20,7 +26,7 @@ public class ChatService {
         chatClient = clientBuilder.build();
     }
 
-    public String chat(ChatRequest request) {
+    public ExpenseInfo chat(ChatRequest request) {
         SystemMessage systemMessage = new SystemMessage("""
                 Hey there! I'm haivoDev, your friendly virtual assistant 🤖✨
                                         Here to help you with anything you need, just ask away!
@@ -30,10 +36,10 @@ public class ChatService {
         return chatClient
                 .prompt(prompt)
                 .call()
-                .content();
+                .entity(ExpenseInfo.class);
     }
 
-    public String chatWithImage(MultipartFile file, @RequestParam String message) {
+    public List<BillItem> chatWithImage(MultipartFile file, @RequestParam String message) {
         Media media = Media.builder()
                 .mimeType(MimeTypeUtils.parseMimeType(file.getContentType()))
                 .data(file.getResource())
@@ -44,7 +50,8 @@ public class ChatService {
                 -> promptUserSpec.media(media)
                 .text(message))
                 .call()
-                .content();
+                .entity(new ParameterizedTypeReference<List<BillItem>>() {
+                });
     }
 }
 
