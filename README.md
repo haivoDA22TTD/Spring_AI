@@ -59,6 +59,4 @@ Dự án tập trung vào các tình huống thực tế như:
 | 📦 **Tích hợp LLM Provider** | Hỗ trợ OpenAI / HuggingFace / Ollama |
 
 ---
-<p align="center">
-<img width="367" height="542" alt="image" src="https://github.com/user-attachments/assets/1210fdde-b134-47f7-9619-2e157c41a088" />
-</p>
+
