@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>haivoDev Chat</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+          theme: {
+            extend: {
+              colors: {
+                primary: '#38bdf8', // sky-400
+                secondary: '#0ea5e9' // sky-500
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-white to-sky-100 min-h-screen flex items-center justify-center font-sans">
+
+<div class="bg-white shadow-xl rounded-2xl p-8 max-w-xl w-full border border-sky-100">
+    <div class="flex items-center gap-3 mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 11c0-1.104.896-2 2-2h6V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2h4v2l4-2h2a2 2 0 002-2v-2h-6a2 2 0 01-2-2z"/>
+        </svg>
+        <h1 class="text-3xl font-bold text-gray-800">haivo<span class="text-primary">Dev</span> Assistant</h1>
+    </div>
+
+    <!-- Text Chat Form -->
+    <form id="textForm" class="space-y-4">
+        <input type="text" id="messageInput" placeholder="Nhập tin nhắn..." required
+               class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" />
+        <button type="submit"
+                class="bg-primary w-full text-white py-2 rounded-lg hover:bg-secondary transition flex items-center justify-center gap-2 disabled:opacity-50"
+                id="sendBtn">
+            <span>Gửi tin nhắn</span>
+            <svg id="textLoading" class="animate-spin h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none"
+                 viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10"
+                        stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8H4z"></path>
+            </svg>
+        </button>
+    </form>
+
+    <!-- Image Chat Form -->
+    <form id="imageForm" class="mt-6 space-y-4" enctype="multipart/form-data">
+        <input type="text" id="imageMessageInput" placeholder="Nhập tin nhắn kèm ảnh..." required
+               class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary" />
+        <input type="file" id="fileInput" accept="image/*"
+               class="w-full border p-2 rounded-lg bg-gray-50" />
+        <button type="submit"
+                class="bg-secondary w-full text-white py-2 rounded-lg hover:bg-sky-600 transition flex items-center justify-center gap-2 disabled:opacity-50"
+                id="sendImageBtn">
+            <span>Gửi ảnh</span>
+            <svg id="imageLoading" class="animate-spin h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none"
+                 viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10"
+                        stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8H4z"></path>
+            </svg>
+        </button>
+    </form>
+
+    <!-- Response Area -->
+    <div id="responseBox"
+         class="mt-6 p-4 bg-sky-50 border border-sky-100 rounded-lg text-gray-800 whitespace-pre-wrap min-h-[80px]">
+        💬 Phản hồi sẽ hiển thị tại đây...
+    </div>
+</div>
+
+<!-- JS -->
+<script>
+    const textForm = document.getElementById("textForm");
+    const imageForm = document.getElementById("imageForm");
+    const responseBox = document.getElementById("responseBox");
+
+    const sendBtn = document.getElementById("sendBtn");
+    const textLoading = document.getElementById("textLoading");
+
+    const sendImageBtn = document.getElementById("sendImageBtn");
+    const imageLoading = document.getElementById("imageLoading");
+
+    textForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const message = document.getElementById("messageInput").value;
+
+      sendBtn.disabled = true;
+      textLoading.classList.remove("hidden");
+
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ message })
+        });
+
+        const result = await response.text();
+        responseBox.textContent = result;
+      } catch (err) {
+        responseBox.textContent = "❌ Đã xảy ra lỗi khi gửi tin nhắn.";
+      }
+
+      sendBtn.disabled = false;
+      textLoading.classList.add("hidden");
+    });
+
+    imageForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const message = document.getElementById("imageMessageInput").value;
+      const file = document.getElementById("fileInput").files[0];
+
+      if (!file) {
+        alert("⚠️ Bạn chưa chọn ảnh!");
+        return;
+      }
+
+      sendImageBtn.disabled = true;
+      imageLoading.classList.remove("hidden");
+
+      const formData = new FormData();
+      formData.append("message", message);
+      formData.append("file", file);
+
+      try {
+        const response = await fetch("/chat-with-image", {
+          method: "POST",
+          body: formData
+        });
+
+        const result = await response.text();
+        responseBox.textContent = result;
+      } catch (err) {
+        responseBox.textContent = "❌ Đã xảy ra lỗi khi gửi ảnh.";
+      }
+
+      sendImageBtn.disabled = false;
+      imageLoading.classList.add("hidden");
+    });
+</script>
+</body>
+</html>
