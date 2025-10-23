@@ -43,7 +43,7 @@ Dự án tập trung vào các tình huống thực tế như:
 - [x] Nhúng văn bản (embedding) và lưu trữ vector
 - [x] Triển khai mô hình RAG (Q&A từ tài liệu nội bộ)
 - [x] Xây dựng REST API nhận câu hỏi từ client
-- [ ] Tích hợp giao diện frontend đơn giản (chưa thực hiện)
+- [ ] Tích hợp giao diện frontend đơn giản 
 
 ---
 
