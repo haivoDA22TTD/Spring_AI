@@ -17,7 +17,6 @@ Dự án tập trung vào các tình huống thực tế như:
 
 - 💬 Tạo hệ thống chat với LLM
 - 🔍 Triển khai cơ chế **RAG** (Retrieval Augmented Generation)
-- 📂 Làm việc với vector store để lưu trữ embedding
 - ⚙️ Triển khai API REST hỗ trợ tương tác với AI
 
 ---
