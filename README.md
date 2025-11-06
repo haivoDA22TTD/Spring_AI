@@ -30,7 +30,7 @@ Dự án tập trung vào các tình huống thực tế như:
 | 🤖 **Spring AI** | Thư viện AI tích hợp vào Spring |
 | 🧠 **OpenAI GPT-4 / GPT-3.5** | Mô hình ngôn ngữ lớn |
 | 🧬 **Embedding & Vector Store** | Để thực hiện tìm kiếm ngữ nghĩa |
-| 🐘 PostgreSQL / 🧠 PGVector / Redis | Vector DB (tuỳ chọn) |
+| 🐬 ***Mysql* / 🧠 PGVector / Redis | Vector DB (tuỳ chọn) |
 | 🐳 Docker | Đóng gói và triển khai (nếu cần) |
 
 ---
