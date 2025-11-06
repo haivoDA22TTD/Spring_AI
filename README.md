@@ -34,7 +34,10 @@ Dự án tập trung vào các tình huống thực tế như:
 | 🐳 Docker | Đóng gói và triển khai (nếu cần) |
 
 ---
-
+## Sơ đồ kiến trúc hệ thống
+  <p align-item="center">
+  <img width="1701" height="837" alt="image" src="https://github.com/user-attachments/assets/f2cba459-2eaa-45f4-be84-c59a95ed0fe1" />
+  </p>
 ## 🎯 Mục tiêu học tập
 
 - [x] Cấu hình và tích hợp Spring AI
