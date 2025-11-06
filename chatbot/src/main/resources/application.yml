@@ -1,8 +1,10 @@
 server:
   port: 8081
+
 spring:
   application:
     name: chatbot
+
   ai:
     openai:
       api-key: ${GEMINI_KEY}
@@ -11,3 +13,21 @@ spring:
         completions-path: /v1beta/openai/chat/completions
         options:
           model: gemini-2.0-flash
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always
+  datasource:
+    url: jdbc:mysql://localhost:3306/spring_ai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password:
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect

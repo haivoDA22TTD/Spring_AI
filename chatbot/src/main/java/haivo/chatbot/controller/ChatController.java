@@ -12,13 +12,16 @@ import org.springframework.web.multipart.MultipartFile;
 public class ChatController {
 
     private final ChatService chatService;
+
     public ChatController(ChatService chatService) {
         this.chatService = chatService;
     }
+
     @PostMapping("/chat")
     public String chat(@RequestBody ChatRequest request) {
         return chatService.chat(request);
     }
+
     @PostMapping("/chat-with-image")
     public String chatWithImage(@RequestParam ("file") MultipartFile file,
                                 @RequestParam ("message") String message){
