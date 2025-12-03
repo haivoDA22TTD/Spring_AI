@@ -16,12 +16,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class ChatService {
     private final ChatClient chatClient;
 
-  public ChatService(ChatClient.Builder clientBuilder) {
-    String geminiKey = System.getenv("GEMINI_KEY");  
-    chatClient = clientBuilder
-        .apiKey(geminiKey)  
-        .build();
-}
+     public ChatService(ChatClient.Builder clientBuilder) {
+        chatClient = clientBuilder.build();
+    }
 
     public String chat(ChatRequest request) {
         SystemMessage systemMessage = new SystemMessage("""
