@@ -5,7 +5,7 @@ spring:
     name: chatbot
   ai:
     openai:
-      api-key: ${GEMINI_KEY}
+      api-key: AIzaSyA3o47zEGMt0NQGxnXkJJgM_O5R2kxpfz4
       chat:
         base-url: https://generativelanguage.googleapis.com
         completions-path: /v1beta/openai/chat/completions
