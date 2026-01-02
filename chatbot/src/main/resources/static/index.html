@@ -1,156 +1,328 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>haivoDev Chat</title>
-    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         tailwind.config = {
           theme: {
             extend: {
               colors: {
-                primary: '#38bdf8', // sky-400
-                secondary: '#0ea5e9' // sky-500
+                primary: '#38bdf8',
+                secondary: '#0ea5e9',
+                accent: '#06b6d4'
               }
             }
           }
         }
     </script>
+    <style>
+        .tab-active { background: linear-gradient(135deg, #38bdf8, #0ea5e9); color: white; }
+        .tab-inactive { background: #f1f5f9; color: #64748b; }
+        .typing-cursor::after { content: '|'; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+        /* Markdown styles */
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 { font-weight: bold; margin: 0.5em 0; }
+        .markdown-content h1 { font-size: 1.5em; }
+        .markdown-content h2 { font-size: 1.25em; }
+        .markdown-content h3 { font-size: 1.1em; }
+        .markdown-content p { margin: 0.5em 0; }
+        .markdown-content ul, .markdown-content ol { margin-left: 1.5em; }
+        .markdown-content li { margin: 0.25em 0; }
+        .markdown-content code { background: #e2e8f0; padding: 0.1em 0.3em; border-radius: 4px; font-size: 0.9em; }
+        .markdown-content pre { background: #1e293b; color: #e2e8f0; padding: 1em; border-radius: 8px; overflow-x: auto; margin: 0.5em 0; }
+        .markdown-content pre code { background: none; padding: 0; }
+        .markdown-content img { max-width: 100%; border-radius: 8px; margin: 0.5em 0; }
+        .markdown-content a { color: #0ea5e9; text-decoration: underline; }
+        .markdown-content blockquote { border-left: 3px solid #38bdf8; padding-left: 1em; margin: 0.5em 0; color: #64748b; }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-white to-sky-100 min-h-screen flex items-center justify-center font-sans">
+<body class="bg-gradient-to-br from-slate-50 via-sky-50 to-cyan-50 min-h-screen flex items-center justify-center font-sans p-4">
 
-<div class="bg-white shadow-xl rounded-2xl p-8 max-w-xl w-full border border-sky-100">
+<div class="bg-white shadow-2xl rounded-3xl p-6 md:p-8 max-w-2xl w-full border border-sky-100">
+    <!-- Header -->
     <div class="flex items-center gap-3 mb-6">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24"
-             stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 11c0-1.104.896-2 2-2h6V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2h4v2l4-2h2a2 2 0 002-2v-2h-6a2 2 0 01-2-2z"/>
-        </svg>
-        <h1 class="text-3xl font-bold text-gray-800">haivo<span class="text-primary">Dev</span> Assistant</h1>
+        <div class="bg-gradient-to-br from-primary to-accent p-2 rounded-xl">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+            </svg>
+        </div>
+        <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">haivo<span class="text-primary">Dev</span> Assistant</h1>
+            <p class="text-sm text-gray-500">Trợ lý ảo thông minh với RAG</p>
+        </div>
     </div>
 
-    <!-- Text Chat Form -->
-    <form id="textForm" class="space-y-4">
-        <input type="text" id="messageInput" placeholder="Nhập tin nhắn..." required
-               class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" />
-        <button type="submit"
-                class="bg-primary w-full text-white py-2 rounded-lg hover:bg-secondary transition flex items-center justify-center gap-2 disabled:opacity-50"
-                id="sendBtn">
-            <span>Gửi tin nhắn</span>
-            <svg id="textLoading" class="animate-spin h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none"
-                 viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10"
-                        stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8H4z"></path>
-            </svg>
+    <!-- Tabs -->
+    <div class="flex gap-2 mb-6 bg-slate-100 p-1 rounded-xl">
+        <button id="tabChat" onclick="switchTab('chat')" class="tab-active flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+            Chat
         </button>
-    </form>
+        <button id="tabRag" onclick="switchTab('rag')" class="tab-inactive flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            Spring Boot RAG
+        </button>
+        <button id="tabImage" onclick="switchTab('image')" class="tab-inactive flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            Ảnh
+        </button>
+    </div>
 
-    <!-- Image Chat Form -->
-    <form id="imageForm" class="mt-6 space-y-4" enctype="multipart/form-data">
-        <input type="text" id="imageMessageInput" placeholder="Nhập tin nhắn kèm ảnh..." required
-               class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary" />
-        <input type="file" id="fileInput" accept="image/*"
-               class="w-full border p-2 rounded-lg bg-gray-50" />
-        <button type="submit"
-                class="bg-secondary w-full text-white py-2 rounded-lg hover:bg-sky-600 transition flex items-center justify-center gap-2 disabled:opacity-50"
-                id="sendImageBtn">
-            <span>Gửi ảnh</span>
-            <svg id="imageLoading" class="animate-spin h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none"
-                 viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10"
-                        stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8H4z"></path>
-            </svg>
-        </button>
-    </form>
+    <!-- Chat Form -->
+    <div id="chatSection">
+        <form id="textForm" class="space-y-4">
+            <div class="relative">
+                <input type="text" id="messageInput" placeholder="Nhập tin nhắn..." required
+                       class="w-full p-4 pr-12 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-primary transition-colors" />
+                <button type="submit" id="sendBtn"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 bg-primary text-white p-2 rounded-lg hover:bg-secondary transition">
+                    <svg id="textLoading" class="animate-spin h-5 w-5 hidden" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    <svg id="sendIcon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- RAG Form -->
+    <div id="ragSection" class="hidden">
+        <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4 mb-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span class="text-sm text-emerald-700 font-medium">Hỏi đáp về Spring Boot</span>
+                </div>
+                <button type="button" onclick="ingestDocuments()" id="ingestBtn"
+                        class="text-xs bg-emerald-500 text-white px-3 py-1 rounded-full hover:bg-emerald-600 transition flex items-center gap-1">
+                    <svg id="ingestLoading" class="animate-spin h-3 w-3 hidden" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    <span id="ingestText">📚 Nạp tài liệu</span>
+                </button>
+            </div>
+        </div>
+        <form id="ragForm" class="space-y-4">
+            <div class="relative">
+                <input type="text" id="ragMessageInput" placeholder="Hỏi về Spring Boot..." required
+                       class="w-full p-4 pr-12 border-2 border-emerald-200 rounded-xl focus:outline-none focus:border-emerald-400 transition-colors" />
+                <button type="submit" id="sendRagBtn"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 bg-emerald-500 text-white p-2 rounded-lg hover:bg-emerald-600 transition">
+                    <svg id="ragLoading" class="animate-spin h-5 w-5 hidden" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    <svg id="ragSendIcon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Image Form -->
+    <div id="imageSection" class="hidden">
+        <form id="imageForm" class="space-y-4" enctype="multipart/form-data">
+            <input type="text" id="imageMessageInput" placeholder="Mô tả hoặc hỏi về ảnh..." required
+                   class="w-full p-4 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-secondary transition-colors" />
+            <div class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-primary transition-colors">
+                <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="updateFileName()" />
+                <label for="fileInput" class="cursor-pointer">
+                    <svg class="w-10 h-10 mx-auto text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <p id="fileLabel" class="text-slate-500">Click để chọn ảnh</p>
+                </label>
+            </div>
+            <button type="submit" id="sendImageBtn"
+                    class="bg-secondary w-full text-white py-3 rounded-xl hover:bg-sky-600 transition flex items-center justify-center gap-2 font-medium">
+                <span>Gửi ảnh</span>
+                <svg id="imageLoading" class="animate-spin h-5 w-5 hidden" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+            </button>
+        </form>
+    </div>
 
     <!-- Response Area -->
-    <div id="responseBox"
-         class="mt-6 p-4 bg-sky-50 border border-sky-100 rounded-lg text-gray-800 whitespace-pre-wrap min-h-[80px]">
-        💬 Phản hồi sẽ hiển thị tại đây...
+    <div id="responseBox" class="mt-6 p-5 bg-gradient-to-br from-slate-50 to-sky-50 border border-slate-200 rounded-xl text-gray-700 min-h-[120px] leading-relaxed max-h-[400px] overflow-y-auto">
+        <div class="flex items-start gap-3">
+            <div class="bg-primary/10 p-2 rounded-lg flex-shrink-0">
+                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                </svg>
+            </div>
+            <div id="responseText" class="markdown-content flex-1">Xin chào! Tôi là haivoDev Assistant. Hãy hỏi tôi bất cứ điều gì! 🚀</div>
+        </div>
     </div>
 </div>
 
-<!-- JS -->
 <script>
-    // Hàm để gõ từng chữ một
-  function typeWriter(text, element, speed = 50) {
-    let i = 0;
-    element.textContent = ""; // Reset nội dung hiện tại
-    const interval = setInterval(() => {
-      if (i < text.length) {
-        element.textContent += text.charAt(i);
-        i++;
-      } else {
-        clearInterval(interval);
-      }
-    }, speed);
-  }
-
-  textForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const message = document.getElementById("messageInput").value;
-
-    sendBtn.disabled = true;
-    textLoading.classList.remove("hidden");
-
-    try {
-      const response = await fetch("/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ message })
-      });
-
-      const result = await response.text();
-      typeWriter(result, responseBox); // Gọi hàm typeWriter để gõ từng chữ một
-    } catch (err) {
-      typeWriter("❌ Đã xảy ra lỗi khi gửi tin nhắn.", responseBox);
+    function switchTab(tab) {
+        const tabs = ['chat', 'rag', 'image'];
+        tabs.forEach(t => {
+            document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`).className = 
+                t === tab ? 'tab-active flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2' 
+                          : 'tab-inactive flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2';
+            document.getElementById(`${t}Section`).classList.toggle('hidden', t !== tab);
+        });
     }
 
-    sendBtn.disabled = false;
-    textLoading.classList.add("hidden");
-  });
-
-  imageForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const message = document.getElementById("imageMessageInput").value;
-    const file = document.getElementById("fileInput").files[0];
-
-    if (!file) {
-      alert("⚠️ Bạn chưa chọn ảnh!");
-      return;
+    function updateFileName() {
+        const file = document.getElementById('fileInput').files[0];
+        document.getElementById('fileLabel').textContent = file ? `📷 ${file.name}` : 'Click để chọn ảnh';
     }
 
-    sendImageBtn.disabled = true;
-    imageLoading.classList.remove("hidden");
-
-    const formData = new FormData();
-    formData.append("message", message);
-    formData.append("file", file);
-
-    try {
-      const response = await fetch("/chat-with-image", {
-        method: "POST",
-        body: formData
-      });
-
-      const result = await response.text();
-      typeWriter(result, responseBox); // Gọi hàm typeWriter để gõ từng chữ một
-    } catch (err) {
-      typeWriter("❌ Đã xảy ra lỗi khi gửi ảnh.", responseBox);
+    function renderResponse(text) {
+        const responseText = document.getElementById('responseText');
+        // Render Markdown với hỗ trợ hình ảnh
+        responseText.innerHTML = marked.parse(text);
     }
 
-    sendImageBtn.disabled = false;
-    imageLoading.classList.add("hidden");
-  });
+    function typeWriter(text, speed = 10) {
+        const responseText = document.getElementById('responseText');
+        let i = 0;
+        let currentText = '';
+        responseText.innerHTML = '';
+        
+        const interval = setInterval(() => {
+            if (i < text.length) {
+                currentText += text.charAt(i);
+                // Render markdown mỗi lần thêm ký tự
+                responseText.innerHTML = marked.parse(currentText);
+                i++;
+            } else {
+                clearInterval(interval);
+            }
+        }, speed);
+    }
 
+    async function ingestDocuments() {
+        const btn = document.getElementById('ingestBtn');
+        const loading = document.getElementById('ingestLoading');
+        const text = document.getElementById('ingestText');
+        
+        btn.disabled = true;
+        loading.classList.remove('hidden');
+        text.textContent = 'Đang nạp...';
+        
+        try {
+            const response = await fetch('/documents/ingest', { method: 'POST' });
+            const result = await response.text();
+            typeWriter('✅ ' + result);
+        } catch (err) {
+            typeWriter('❌ Lỗi khi nạp tài liệu: ' + err.message);
+        }
+        
+        btn.disabled = false;
+        loading.classList.add('hidden');
+        text.textContent = '📚 Nạp tài liệu';
+    }
+
+    // Chat form
+    document.getElementById('textForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const message = document.getElementById('messageInput').value;
+        const btn = document.getElementById('sendBtn');
+        const loading = document.getElementById('textLoading');
+        const icon = document.getElementById('sendIcon');
+        
+        btn.disabled = true;
+        loading.classList.remove('hidden');
+        icon.classList.add('hidden');
+        
+        try {
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+            const result = await response.text();
+            typeWriter(result);
+        } catch (err) {
+            typeWriter('❌ Đã xảy ra lỗi khi gửi tin nhắn.');
+        }
+        
+        btn.disabled = false;
+        loading.classList.add('hidden');
+        icon.classList.remove('hidden');
+    });
+
+    // RAG form
+    document.getElementById('ragForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const message = document.getElementById('ragMessageInput').value;
+        const btn = document.getElementById('sendRagBtn');
+        const loading = document.getElementById('ragLoading');
+        const icon = document.getElementById('ragSendIcon');
+        
+        btn.disabled = true;
+        loading.classList.remove('hidden');
+        icon.classList.add('hidden');
+        
+        try {
+            const response = await fetch('/chat/rag', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+            const result = await response.text();
+            typeWriter(result);
+        } catch (err) {
+            typeWriter('❌ Đã xảy ra lỗi. Hãy thử nạp tài liệu trước!');
+        }
+        
+        btn.disabled = false;
+        loading.classList.add('hidden');
+        icon.classList.remove('hidden');
+    });
+
+    // Image form
+    document.getElementById('imageForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const message = document.getElementById('imageMessageInput').value;
+        const file = document.getElementById('fileInput').files[0];
+        
+        if (!file) {
+            alert('⚠️ Bạn chưa chọn ảnh!');
+            return;
+        }
+        
+        const btn = document.getElementById('sendImageBtn');
+        const loading = document.getElementById('imageLoading');
+        
+        btn.disabled = true;
+        loading.classList.remove('hidden');
+        
+        const formData = new FormData();
+        formData.append('message', message);
+        formData.append('file', file);
+        
+        try {
+            const response = await fetch('/chat-with-image', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.text();
+            typeWriter(result);
+        } catch (err) {
+            typeWriter('❌ Đã xảy ra lỗi khi gửi ảnh.');
+        }
+        
+        btn.disabled = false;
+        loading.classList.add('hidden');
+    });
 </script>
 </body>
 </html>

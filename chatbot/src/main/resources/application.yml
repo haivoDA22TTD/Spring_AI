@@ -5,9 +5,19 @@ spring:
     name: chatbot
   ai:
     openai:
-      api-key: ${GEMINI_KEY}
+      api-key:
       chat:
         base-url: https://generativelanguage.googleapis.com
         completions-path: /v1beta/openai/chat/completions
         options:
-          model: gemini-2.0-flash
+          model: gemini-2.5-flash
+      embedding:
+        base-url: https://generativelanguage.googleapis.com
+        embeddings-path: /v1beta/openai/embeddings
+        options:
+          model: text-embedding-004
+
+# RAG Configuration
+rag:
+  document-url: https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/
+  vector-store-path: ./vector-store.json
